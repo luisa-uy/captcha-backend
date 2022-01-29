@@ -20,6 +20,7 @@
 			var luisadialogo = 0;
 			idimg1 = 0;
 			idimg2 = 0;
+			token = '';
 			function luisaexito(){
 				luisadialogo.dialog("destroy");
 			}
@@ -32,9 +33,6 @@
 				}
 			}
 			
-			function jsonCallback(json){
-				console.log(json);
-			}
 			function luisagetimagenes(){
 				$.ajax({
 					url: "http://localhost:5000/api/captcha/",
@@ -43,21 +41,17 @@
 					async : true,
 					dataType: "jsonp",
 					jsonpCallback: "captcha",
-					beforeSend: (xhr) => {
-						if (xhr && xhr.overrideMimeType){
-							xhr.overrideMimeType('application/javascript; charset=utf-8');
-						}
-					},
 					error: function (error){
 						alert(JSON.stringify(error));
 					}
 				})
 				.done(function(json){
 					console.log(json)
-					$("#luisaimg1").html('<img src="' + json.captcha.bloques[0].imagen + '"/>');
-					$("#luisaimg2").html('<img src="' + json.captcha.bloques[1].imagen + '"/>');
+					$("#luisaimg1").html('<img src="data:image/png;base64,' + json.captcha.bloques[0].imagen + '"/>');
+					$("#luisaimg2").html('<img src="data:image/png;base64,' + json.captcha.bloques[1].imagen + '"/>');
 					idimg1 = json.captcha.bloques[0].id;
 					idimg2 = json.captcha.bloques[1].id;
+					token = json.captcha.token;
 				})
 				.fail(function(jqXHR, textStatus, errorThrown){
 					luisaexito();
@@ -65,13 +59,21 @@
 			}
 			function luisaenviar(){
 				$.ajax({
-					url: "luisaenviar.php" ,
-					data: {
-						id1: idimg1,
-						id2: idimg2,
-						txt1: $('#luisap1').val(),
-						txt2: $('#luisap2').val()
-					}	
+					url: "http://localhost:5000/api/captcha/",
+					type: "POST",
+					headers : {
+						"Content-Type": "application/json"
+					},
+					crossDomain: true,
+					async : true,
+					dataType: "JSON",
+					data: JSON.stringify({
+						token : token,
+						bloques : [
+							$('#luisap1').val(),
+							$('#luisap2').val()
+						]
+					})
 				})
 				.done(function(json){
 					if(json.error == 0){
@@ -118,7 +120,7 @@
 				if(url == 1) {
 					html += '<a href="https://mh.udelar.edu.uy/luisa/" target="_blank">LUISA Udelar</a>';
 				}
-				
+
 				html += '</div>';
 				return html;
 			}
