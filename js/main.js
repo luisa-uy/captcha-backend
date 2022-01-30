@@ -108,6 +108,6 @@ function luisaform(logo,url){
 	return html;
 }
 function luisacaptcha(maxintentos, logo, url){
-	luisadialogo = $(luisaform(logo, url)).dialog({modal: true}).css('width','auto !important');
+	luisadialogo = $(luisaform(logo, url)).dialog({modal: true, width: 600});
 	luisagetimagenes();
 }
